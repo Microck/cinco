@@ -1,29 +1,40 @@
 import { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from 'discord.js'
+import { fixImgurLink } from '../utils/imgur.js'
 
 export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilder {
   const embed = new EmbedBuilder()
-    .setColor(0x121417)
+    .setColor(0x2F3136) // Specific dark theme color
   
   if (product.name) embed.setTitle(String(product.name))
   if (product.imageUrl) embed.setImage(fixImgurLink(String(product.imageUrl)))
   
   const fields: { name: string; value: string; inline: boolean }[] = []
   
-  if (product.brand) fields.push({ name: 'Brand', value: String(product.brand), inline: true })
-  if (product.price) fields.push({ name: 'Price', value: `$${product.price}`, inline: true })
-  if (product.stock || product.status) {
-    fields.push({ name: 'Status', value: String(product.stock || product.status), inline: true })
-  }
-  if (product.category) fields.push({ name: 'Category', value: String(product.category), inline: true })
+  // Primary fields with specific formatting
+  if (product.brand) fields.push({ name: 'Brand:', value: String(product.brand), inline: true })
+  if (product.price) fields.push({ name: 'Price:', value: `$${product.price}`, inline: true })
   
-  const skipFields = ['id', 'name', 'brand', 'price', 'stock', 'status', 'category', 'imageUrl', 'productUrl']
+  const status = product.stock || product.status
+  if (status) {
+    const statusEmoji = status === 'STABLE' ? '🟢' : status === 'OUT' ? '🔴' : '⚪'
+    fields.push({ name: 'Status:', value: `${statusEmoji} ${status}`, inline: true })
+  }
+
+  // Filter out these fields from the generic list
+  const skipFields = [
+    'id', 'name', 'brand', 'price', 'stock', 'status', 'category', 'imageUrl', 'productUrl',
+    'threadCount', 'serial', 'images', 'rating' // Removed noisy schema fields
+  ]
+
   for (const [key, value] of Object.entries(product)) {
     if (skipFields.includes(key)) continue
     if (value === null || value === undefined || value === '') continue
     if (typeof value === 'object') continue
     if (fields.length >= 25) break
     
-    fields.push({ name: key, value: String(value), inline: true })
+    // Capitalize key for display
+    const displayName = key.charAt(0).toUpperCase() + key.slice(1) + ':'
+    fields.push({ name: displayName, value: String(value), inline: true })
   }
   
   if (fields.length > 0) embed.addFields(fields)
@@ -37,35 +48,27 @@ export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilde
 
 export function buildDropEmbed(drop: Record<string, unknown>): EmbedBuilder {
   const embed = new EmbedBuilder()
-    .setColor(0x121417)
+    .setColor(0x2F3136)
   
   if (drop.name) embed.setTitle(String(drop.name))
   if (drop.imageUrl) embed.setImage(fixImgurLink(String(drop.imageUrl)))
   
   const fields: { name: string; value: string; inline: boolean }[] = []
   
-  if (drop.brand) fields.push({ name: 'Brand', value: String(drop.brand), inline: true })
-  if (drop.price) fields.push({ name: 'Price', value: String(drop.price), inline: true })
-  if (drop.status) fields.push({ name: 'Status', value: String(drop.status), inline: true })
-  if (drop.releaseDate) fields.push({ name: 'Release', value: String(drop.releaseDate), inline: true })
-  if (drop.hint) fields.push({ name: 'Hint', value: String(drop.hint), inline: false })
+  if (drop.brand) fields.push({ name: 'Brand:', value: String(drop.brand), inline: true })
+  if (drop.price) fields.push({ name: 'Price:', value: `$${drop.price}`, inline: true })
+  
+  if (drop.status) {
+    const statusEmoji = drop.status === 'ACTIVE' ? '🟢' : '⚪'
+    fields.push({ name: 'Status:', value: `${statusEmoji} ${drop.status}`, inline: true })
+  }
+  
+  if (drop.releaseDate) fields.push({ name: 'Release:', value: String(drop.releaseDate), inline: true })
+  if (drop.hint) fields.push({ name: 'Hint:', value: String(drop.hint), inline: false })
   
   if (fields.length > 0) embed.addFields(fields)
   
   return embed
-}
-
-function fixImgurLink(url: string): string {
-  if (!url.includes('imgur.com')) return url
-  
-  if (url.includes('i.imgur.com') && /\.(jpg|jpeg|png|gif|webp)$/i.test(url)) return url
-  
-  const match = /imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]{5,})/i.exec(url)
-  if (match && match[1]) {
-    return `https://i.imgur.com/${match[1]}.png`
-  }
-  
-  return url
 }
 
 export function buildProductModal(_guildId: string): ModalBuilder {
@@ -75,7 +78,7 @@ export function buildProductModal(_guildId: string): ModalBuilder {
   
   const idInput = new TextInputBuilder()
     .setCustomId('id')
-    .setLabel('ID (url slug)')
+    .setLabel('ID (or Product URL to extract slug)')
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
   
@@ -172,7 +175,7 @@ export function buildDropModal(_guildId: string): ModalBuilder {
   
   const idInput = new TextInputBuilder()
     .setCustomId('id')
-    .setLabel('ID')
+    .setLabel('ID (or URL)')
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
   
