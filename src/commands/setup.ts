@@ -43,6 +43,14 @@ export async function handleSetup(interaction: Interaction): Promise<void> {
     return
   }
   
+  if (sub === 'baseurl') {
+    let url = cmd.options.getString('url', true)
+    if (url.endsWith('/')) url = url.slice(0, -1)
+    upsertServerConfig(cmd.guildId, null, null, null, url)
+    await cmd.reply({ content: `Base URL set: \`${url}\``, ephemeral: true })
+    return
+  }
+  
   if (sub === 'view') {
     const config = getServerConfig(cmd.guildId)
     if (!config || !config.gist_id) {
@@ -56,6 +64,7 @@ export async function handleSetup(interaction: Interaction): Promise<void> {
         '**Server Configuration**',
         `Gist ID: \`${config.gist_id}\``,
         `Token: ${hasToken ? 'Set' : 'Not set'}`,
+        `Base URL: ${config.base_url || 'Not set'}`,
         `Schema: ${config.schema_profile || 'Auto-detect'}`,
       ].join('\n'),
       ephemeral: true,

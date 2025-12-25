@@ -83,7 +83,7 @@ export async function handleProduct(interaction: Interaction): Promise<void> {
       return
     }
     
-    const embed = buildProductEmbed(product)
+    const embed = buildProductEmbed(product, config.base_url)
     await cmd.editReply({ embeds: [embed] })
     return
   }

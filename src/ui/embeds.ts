@@ -1,16 +1,15 @@
 import { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from 'discord.js'
 import { fixImgurLink } from '../utils/imgur.js'
 
-export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilder {
+export function buildProductEmbed(product: Record<string, unknown>, baseUrl?: string | null): EmbedBuilder {
   const embed = new EmbedBuilder()
-    .setColor(0x2F3136) // Specific dark theme color
+    .setColor(0x2F3136)
   
   if (product.name) embed.setTitle(String(product.name))
   if (product.imageUrl) embed.setImage(fixImgurLink(String(product.imageUrl)))
   
   const fields: { name: string; value: string; inline: boolean }[] = []
   
-  // Primary fields with specific formatting
   if (product.brand) fields.push({ name: 'Brand:', value: String(product.brand), inline: true })
   if (product.price) fields.push({ name: 'Price:', value: `$${product.price}`, inline: true })
   
@@ -20,10 +19,9 @@ export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilde
     fields.push({ name: 'Status:', value: `${statusEmoji} ${status}`, inline: true })
   }
 
-  // Filter out these fields from the generic list
   const skipFields = [
     'id', 'name', 'brand', 'price', 'stock', 'status', 'category', 'imageUrl', 'productUrl',
-    'threadCount', 'serial', 'images', 'rating' // Removed noisy schema fields
+    'threadCount', 'serial', 'images', 'rating'
   ]
 
   for (const [key, value] of Object.entries(product)) {
@@ -32,16 +30,17 @@ export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilde
     if (typeof value === 'object') continue
     if (fields.length >= 25) break
     
-    // Capitalize key for display
     const displayName = key.charAt(0).toUpperCase() + key.slice(1) + ':'
     fields.push({ name: displayName, value: String(value), inline: true })
   }
   
   if (fields.length > 0) embed.addFields(fields)
   
-  if (product.productUrl) {
-    embed.setURL(String(product.productUrl))
-  }
+  const productUrl = product.productUrl 
+    ? String(product.productUrl) 
+    : (baseUrl && product.id ? `${baseUrl}/product/${product.id}` : null)
+  
+  if (productUrl) embed.setURL(productUrl)
   
   return embed
 }
@@ -78,7 +77,7 @@ export function buildProductModal(_guildId: string): ModalBuilder {
   
   const idInput = new TextInputBuilder()
     .setCustomId('id')
-    .setLabel('ID (or Product URL to extract slug)')
+    .setLabel('ID (or URL to extract slug)')
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
   
@@ -94,15 +93,15 @@ export function buildProductModal(_guildId: string): ModalBuilder {
     .setStyle(TextInputStyle.Short)
     .setRequired(true)
   
-  const imageInput = new TextInputBuilder()
-    .setCustomId('imageUrl')
-    .setLabel('Image URL')
+  const brandInput = new TextInputBuilder()
+    .setCustomId('brand')
+    .setLabel('Brand')
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
   
-  const urlInput = new TextInputBuilder()
-    .setCustomId('productUrl')
-    .setLabel('Product URL')
+  const imageInput = new TextInputBuilder()
+    .setCustomId('imageUrl')
+    .setLabel('Image URL (Imgur supported)')
     .setStyle(TextInputStyle.Short)
     .setRequired(false)
   
@@ -110,8 +109,8 @@ export function buildProductModal(_guildId: string): ModalBuilder {
     new ActionRowBuilder<TextInputBuilder>().addComponents(idInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(priceInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(brandInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(imageInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(urlInput),
   )
   
   return modal
@@ -136,18 +135,18 @@ export function buildProductEditModal(productId: string, product: Record<string,
     .setValue(String(product.price || ''))
     .setRequired(true)
   
-  const imageInput = new TextInputBuilder()
-    .setCustomId('imageUrl')
-    .setLabel('Image URL')
+  const brandInput = new TextInputBuilder()
+    .setCustomId('brand')
+    .setLabel('Brand')
     .setStyle(TextInputStyle.Short)
-    .setValue(String(product.imageUrl || ''))
+    .setValue(String(product.brand || ''))
     .setRequired(false)
   
-  const urlInput = new TextInputBuilder()
-    .setCustomId('productUrl')
-    .setLabel('Product URL')
+  const imageInput = new TextInputBuilder()
+    .setCustomId('imageUrl')
+    .setLabel('Image URL (Imgur supported)')
     .setStyle(TextInputStyle.Short)
-    .setValue(String(product.productUrl || ''))
+    .setValue(String(product.imageUrl || ''))
     .setRequired(false)
   
   const stockInput = new TextInputBuilder()
@@ -160,8 +159,8 @@ export function buildProductEditModal(productId: string, product: Record<string,
   modal.addComponents(
     new ActionRowBuilder<TextInputBuilder>().addComponents(nameInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(priceInput),
+    new ActionRowBuilder<TextInputBuilder>().addComponents(brandInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(imageInput),
-    new ActionRowBuilder<TextInputBuilder>().addComponents(urlInput),
     new ActionRowBuilder<TextInputBuilder>().addComponents(stockInput),
   )
   

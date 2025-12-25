@@ -30,6 +30,7 @@ export function initDb(): void {
       gist_token_encrypted TEXT,
       gist_id TEXT,
       schema_profile TEXT,
+      base_url TEXT,
       created_at INTEGER DEFAULT (unixepoch()),
       updated_at INTEGER DEFAULT (unixepoch())
     );
