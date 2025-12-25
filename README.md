@@ -82,6 +82,8 @@ flowchart TD
 /setup view         → view current config
 ```
 
+![setup view](https://github.com/user-attachments/assets/placeholder6)
+
 #### 2. manage inventory
 
 ```
@@ -92,11 +94,25 @@ flowchart TD
                       same flow for upcoming releases
 ```
 
+![products](https://github.com/user-attachments/assets/placeholder1)
+
 **adding a product:**
 1. click [Add] → fill modal (name, price, brand)
 2. "add image?" prompt → [Upload Image] or [Skip]
 3. if upload: send image in chat → auto-uploaded to catbox
 4. done! product saved with [Announce] button
+
+![products add/edit](https://github.com/user-attachments/assets/placeholder4)
+
+**browsing products:**
+
+![products list](https://github.com/user-attachments/assets/placeholder2)
+
+![products view](https://github.com/user-attachments/assets/placeholder3)
+
+**announcing:**
+
+![products announce](https://github.com/user-attachments/assets/placeholder5)
 
 #### 3. permissions
 
