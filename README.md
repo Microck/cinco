@@ -1,8 +1,18 @@
-# cinco
+<p align="center">
+  <a href="https://github.com/Microck/cinco">
+    <img src="https://github.com/user-attachments/assets/1f4fc1a8-bffb-4b2e-98fe-1e145d02eb03" alt="logo" width="200">
+  </a>
+</p>
 
-[![license](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE) [![typescript](https://img.shields.io/badge/typescript-5.7-blue.svg)](https://www.typescriptlang.org/) [![discord](https://img.shields.io/badge/discord.js-14.16-5865F2.svg)](https://discord.js.org/)
+<p align="center">a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync, schema auto-detection, and encrypted token storage. </p>
 
-a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync, schema auto-detection, and encrypted token storage.
+
+<p align="center">
+  <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
+  <a href="https://www.typescriptlang.org/"><img alt="typescript" src="https://img.shields.io/badge/typescript-5.7-blue.svg" /></a>
+  <a href="https://discord.js.org/"><img alt="discord" src="https://img.shields.io/badge/discord.js-14.16-5865F2.svg" /></a>
+</p>
+
 
 ---
 
