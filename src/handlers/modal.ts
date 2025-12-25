@@ -13,6 +13,8 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+import { mergeWithSchema } from '../schema/detector.js'
+
 export async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
   const { customId, guildId } = interaction
   
@@ -57,7 +59,11 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     const data = await fetchGistData(guildId)
     if (!data.products) data.products = []
     
-    data.products.push({ id, name, price, imageUrl, productUrl, stock: 'STABLE' })
+    const products = data.products as Record<string, unknown>[]
+    const newItem = { id, name, price, imageUrl, productUrl, stock: 'STABLE' }
+    const mergedItem = mergeWithSchema(newItem, products)
+    
+    products.push(mergedItem)
     await updateGistData(guildId, data)
     
     await interaction.editReply(`Added product: ${name}`)
@@ -80,7 +86,10 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     if (!data[dropsKey]) data[dropsKey] = []
     const drops = data[dropsKey] as Record<string, unknown>[]
     
-    drops.push({ id, name, brand, hint, status: 'PENDING' })
+    const newItem = { id, name, brand, hint, status: 'PENDING' }
+    const mergedItem = mergeWithSchema(newItem, drops)
+    
+    drops.push(mergedItem)
     await updateGistData(guildId, data)
     
     await interaction.editReply(`Added drop: ${name}`)
