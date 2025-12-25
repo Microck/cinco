@@ -14,6 +14,7 @@ import { handleAsk } from '../commands/ask.js'
 import { handleQuickstart, handleQuickstartButton, handleQuickstartModal } from '../commands/quickstart.js'
 import { handleModal } from './modal.js'
 import { handleAutocomplete } from './autocomplete.js'
+import { handleSelectMenu } from './selectMenu.js'
 
 const commands: Record<string, (interaction: Interaction) => Promise<void>> = {
   quickstart: handleQuickstart,
@@ -86,6 +87,20 @@ export async function handleInteraction(interaction: Interaction): Promise<void>
       await handleAutocomplete(interaction)
     } catch (err) {
       console.error('Autocomplete error:', err)
+    }
+    return
+  }
+
+  if (interaction.isStringSelectMenu()) {
+    try {
+      await handleSelectMenu(interaction)
+    } catch (err) {
+      console.error('Select menu error:', err)
+      if (interaction.replied || interaction.deferred) {
+        await interaction.followUp({ content: 'An error occurred while processing selection', ephemeral: true })
+      } else {
+        await interaction.reply({ content: 'An error occurred while processing selection', ephemeral: true })
+      }
     }
     return
   }

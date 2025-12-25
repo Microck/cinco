@@ -116,8 +116,8 @@ manage who can control the bot.
 |:---|:---|
 | `/quickstart` | **owner only.** interactive wizard to set up everything. |
 | `/setup` | configure gist tokens and ids. |
-| `/product` | `add`, `list`, `view`, `delete` products. |
-| `/drop` | `add`, `list`, `view`, `delete` drops. |
+| `/product` | `add`, `list`, `view`, `delete` products. supports interactive menus. |
+| `/drop` | `add`, `list`, `view`, `delete` drops. supports interactive menus. |
 | `/announce` | post a nice embed of a product/drop to a channel. |
 | `/sync` | force a pull/push sync with github. |
 | `/ask` | ask the ai assistant for help. |
