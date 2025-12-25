@@ -41,7 +41,7 @@ export async function handleAnnounce(interaction: Interaction): Promise<void> {
       await cmd.editReply(`Product not found: ${id}`)
       return
     }
-    embed = buildProductEmbed(product, config.base_url)
+    embed = buildProductEmbed(product, config.base_url, true)
   } else {
     const dropsKey = detectDropsKey(data)
     const drops = (data[dropsKey] || []) as Record<string, unknown>[]

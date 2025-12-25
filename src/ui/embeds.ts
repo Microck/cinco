@@ -1,7 +1,7 @@
 import { EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } from 'discord.js'
 import { fixImgurLink } from '../utils/imgur.js'
 
-export function buildProductEmbed(product: Record<string, unknown>, baseUrl?: string | null): EmbedBuilder {
+export function buildProductEmbed(product: Record<string, unknown>, baseUrl?: string | null, forAnnounce = false): EmbedBuilder {
   const embed = new EmbedBuilder()
     .setColor(0x2F3136)
   
@@ -13,10 +13,12 @@ export function buildProductEmbed(product: Record<string, unknown>, baseUrl?: st
   if (product.brand) fields.push({ name: 'Brand:', value: String(product.brand), inline: true })
   if (product.price) fields.push({ name: 'Price:', value: `$${product.price}`, inline: true })
   
-  const status = product.stock || product.status
-  if (status) {
-    const statusEmoji = status === 'STABLE' ? '🟢' : status === 'OUT' ? '🔴' : '⚪'
-    fields.push({ name: 'Status:', value: `${statusEmoji} ${status}`, inline: true })
+  if (!forAnnounce) {
+    const status = product.stock || product.status
+    if (status) {
+      const statusEmoji = status === 'STABLE' ? '🟢' : status === 'OUT' ? '🔴' : '⚪'
+      fields.push({ name: 'Status:', value: `${statusEmoji} ${status}`, inline: true })
+    }
   }
 
   const skipFields = [
@@ -36,9 +38,9 @@ export function buildProductEmbed(product: Record<string, unknown>, baseUrl?: st
   
   if (fields.length > 0) embed.addFields(fields)
   
-  const productUrl = product.productUrl 
-    ? String(product.productUrl) 
-    : (baseUrl && product.id ? `${baseUrl}/product/${product.id}` : null)
+  const productUrl = forAnnounce
+    ? (baseUrl && product.id ? `${baseUrl}/product/${product.id}` : null)
+    : (product.productUrl ? String(product.productUrl) : (baseUrl && product.id ? `${baseUrl}/product/${product.id}` : null))
   
   if (productUrl) embed.setURL(productUrl)
   
