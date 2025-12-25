@@ -3,6 +3,8 @@ import { upsertServerConfig } from '../database/models.js'
 import { encrypt } from '../services/crypto.js'
 import { fetchGistData, updateGistData } from '../services/gist.js'
 import { isOwner } from '../utils/permissions.js'
+import { mergeWithSchema } from '../schema/detector.js'
+import { fixImgurLink } from '../utils/imgur.js'
 
 function isValidUrl(url: string): boolean {
   try {
@@ -12,8 +14,6 @@ function isValidUrl(url: string): boolean {
     return false
   }
 }
-
-import { mergeWithSchema } from '../schema/detector.js'
 
 export async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
   const { customId, guildId } = interaction
@@ -37,10 +37,11 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   }
   
   if (customId === 'product_add') {
-    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const rawImageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const imageUrl = fixImgurLink(rawImageUrl)
     const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     
-    if (imageUrl && !isValidUrl(imageUrl)) {
+    if (rawImageUrl && !isValidUrl(rawImageUrl)) {
       await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
       return
     }
@@ -97,10 +98,11 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   }
   
   if (customId.startsWith('product_edit:')) {
-    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const rawImageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const imageUrl = fixImgurLink(rawImageUrl)
     const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     
-    if (imageUrl && !isValidUrl(imageUrl)) {
+    if (rawImageUrl && !isValidUrl(rawImageUrl)) {
       await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
       return
     }
@@ -118,15 +120,18 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     const stock = interaction.fields.getTextInputValue('stock') || 'STABLE'
     
     const data = await fetchGistData(guildId)
-    const products = data.products || []
-    const index = products.findIndex(p => p.id === productId)
+    const products = data.products as Record<string, unknown>[] || []
+    const index = products.findIndex((p: any) => p.id === productId)
     
     if (index === -1) {
       await interaction.editReply(`Product not found: ${productId}`)
       return
     }
     
-    products[index] = { ...products[index], name, price, imageUrl, productUrl, stock }
+    const updatedItem = { ...products[index], name, price, imageUrl, productUrl, stock }
+    const mergedItem = mergeWithSchema(updatedItem, products)
+    products[index] = mergedItem
+    
     data.products = products
     await updateGistData(guildId, data)
     
