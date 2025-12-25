@@ -1,7 +1,8 @@
 import type { Interaction, ChatInputCommandInteraction } from 'discord.js'
 import { hasPermission, isOwner } from '../utils/permissions.js'
 import { getServerConfig } from '../database/models.js'
-import { fetchGistData } from '../services/gist.js'
+import { fetchGistData, updateGistData } from '../services/gist.js'
+import { mergeWithSchema } from '../schema/detector.js'
 
 export async function handleSync(interaction: Interaction): Promise<void> {
   if (!interaction.isChatInputCommand()) return
@@ -27,12 +28,20 @@ export async function handleSync(interaction: Interaction): Promise<void> {
   await cmd.deferReply({ ephemeral: true })
   
   const data = await fetchGistData(cmd.guildId, true)
-  const productCount = (data.products || []).length
+  const products = (data.products || []) as Record<string, unknown>[]
+  
+  const repairedProducts = products.map(p => mergeWithSchema(p, products))
+  data.products = repairedProducts
+
   const dropsKey = Object.keys(data).find(k => 
     k !== 'products' && Array.isArray(data[k])
   ) || 'drops'
-  const drops = (data[dropsKey] || []) as unknown[]
-  const dropCount = drops.length
+  const drops = (data[dropsKey] || []) as Record<string, unknown>[]
   
-  await cmd.editReply(`Synced: ${productCount} products, ${dropCount} drops`)
+  const repairedDrops = drops.map(d => mergeWithSchema(d, drops))
+  data[dropsKey] = repairedDrops
+  
+  await updateGistData(cmd.guildId, data)
+  
+  await cmd.editReply(`Synced and repaired schema: ${repairedProducts.length} products, ${repairedDrops.length} drops`)
 }
