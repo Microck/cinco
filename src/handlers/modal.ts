@@ -4,6 +4,15 @@ import { encrypt } from '../services/crypto.js'
 import { fetchGistData, updateGistData } from '../services/gist.js'
 import { isOwner } from '../utils/permissions.js'
 
+function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 export async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
   const { customId, guildId } = interaction
   
@@ -26,13 +35,24 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   }
   
   if (customId === 'product_add') {
+    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
+    
+    if (imageUrl && !isValidUrl(imageUrl)) {
+      await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
+      return
+    }
+    
+    if (productUrl && !isValidUrl(productUrl)) {
+      await interaction.reply({ content: 'Invalid Product URL. Must start with http:// or https://', ephemeral: true })
+      return
+    }
+
     await interaction.deferReply({ ephemeral: true })
     
     const id = interaction.fields.getTextInputValue('id')
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
-    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
-    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     
     const data = await fetchGistData(guildId)
     if (!data.products) data.products = []
@@ -68,13 +88,24 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   }
   
   if (customId.startsWith('product_edit:')) {
+    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
+    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
+    
+    if (imageUrl && !isValidUrl(imageUrl)) {
+      await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
+      return
+    }
+    
+    if (productUrl && !isValidUrl(productUrl)) {
+      await interaction.reply({ content: 'Invalid Product URL. Must start with http:// or https://', ephemeral: true })
+      return
+    }
+
     const productId = customId.replace('product_edit:', '')
     await interaction.deferReply({ ephemeral: true })
     
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
-    const imageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
-    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     const stock = interaction.fields.getTextInputValue('stock') || 'STABLE'
     
     const data = await fetchGistData(guildId)
