@@ -4,8 +4,7 @@
   </a>
 </p>
 
-<p align="center">a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync, schema auto-detection, and encrypted token storage. </p>
-
+<p align="center">a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync, schema auto-detection, and encrypted token storage.</p>
 
 <p align="center">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
@@ -13,25 +12,21 @@
   <a href="https://discord.js.org/"><img alt="discord" src="https://img.shields.io/badge/discord.js-14.16-5865F2.svg" /></a>
 </p>
 
-
 ---
 
 ### quickstart
 
-[](#quickstart)
-
 **docker (recommended)**
 
 ```bash
-# clone and setup
 git clone https://github.com/microck/cinco.git
 cd cinco
 cp .env.example .env
 
-# edit .env with your DISCORD_TOKEN, OWNER_ID, and NVIDIA_API_KEY
+# edit .env with your DISCORD_TOKEN, DISCORD_CLIENT_ID, ENCRYPTION_KEY
 # generate key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
-# run
+npm install && npm run register  # register commands once
 docker compose up -d
 ```
 
@@ -39,7 +34,7 @@ docker compose up -d
 
 ```bash
 npm install
-npm run register  # register slash commands
+npm run register
 npm run dev
 ```
 
@@ -47,95 +42,97 @@ npm run dev
 
 ### features
 
-[](#features)
-
 cinco turns discord into a cms for your static site.
 
--   **gist backend:** uses github gists as a database. free, versioned, and fast.
--   **schema agnostic:** auto-detects if you are selling products, drops, or link lists. maintains your json structure.
--   **encrypted storage:** all user tokens are aes-256-gcm encrypted at rest.
--   **role-based access:** granular permissions (owner, admin, allowed) per server.
--   **ai assistant:** built-in help via `/ask` using nvidia llama 4 (if configured).
--   **health monitoring:** built-in express api for uptime checks.
+- **gist backend:** uses github gists as a database. free, versioned, and fast.
+- **interactive menus:** button-based ui for all operations. no commands to memorize.
+- **image upload:** drag & drop images, auto-uploaded to catbox.moe.
+- **encrypted storage:** all user tokens are aes-256-gcm encrypted at rest.
+- **role-based access:** granular permissions (owner, admin, allowed) per server.
+- **ai assistant:** built-in help via `/ask` using nvidia llama 4 (if configured).
 
 ---
 
 ### how it works
 
-[](#how-it-works)
-
-cinco bridges discord interaction directly to your frontend's data source.
-
 ```mermaid
 flowchart TD
-    A[Discord User] -->|/product add| B(Cinco Bot)
-    B -->|AES Decrypt| C{Token Manager}
-    C -->|Authenticated Req| D[GitHub Gist]
-    D -->|Update JSON| E[Your Website]
-    E -->|Fetch| F[Customer Browser]
+    A[Discord User] -->|/products| B(Cinco Bot)
+    B -->|Button Click| C[Add/Edit/Delete]
+    C -->|AES Decrypt| D{Token Manager}
+    D -->|Authenticated Req| E[GitHub Gist]
+    E -->|Update JSON| F[Your Website]
 ```
 
-1.  **connect:** admin runs `/setup token` to link a gist.
-2.  **manage:** use `/product` or `/drop` commands to modify data.
-3.  **sync:** bot pushes changes to github immediately.
-4.  **serve:** your site fetches the raw gist content.
+1. **connect:** owner runs `/setup token` and `/setup gist <id>` to link a gist.
+2. **manage:** use `/products` or `/upcoming` - everything is button-driven.
+3. **sync:** bot pushes changes to github immediately.
+4. **serve:** your site fetches the raw gist content.
 
 ---
 
 ### usage
 
-[](#usage)
+#### 1. setup (owner only)
 
-#### 1. setup
-
-connect your server to a gist.
-
-> `/setup token <your-github-token>`
-> `/setup gist <gist-id>`
+```
+/setup token        → opens modal for github token
+/setup gist <id>    → set gist id
+/setup baseurl <url> → set your website url (for product links)
+/setup view         → view current config
+```
 
 #### 2. manage inventory
 
-add a new drop or product.
+```
+/products           → shows [Add] [List] [Sync] buttons
+                      click List → select product → [Edit] [Delete] [Announce]
 
-> `/drop add` -> opens a modal form
-> `/product list` -> shows current inventory
+/upcoming           → shows [Add] [List] buttons
+                      same flow for upcoming releases
+```
 
-#### 3. configuration
+**adding a product:**
+1. click [Add] → fill modal (name, price, brand)
+2. "add image?" prompt → [Upload Image] or [Skip]
+3. if upload: send image in chat → auto-uploaded to catbox
+4. done! product saved with [Announce] button
 
-manage who can control the bot.
+#### 3. permissions
 
-> `/config add admin @user`
+```
+/config add admin @user    → give admin access
+/config add allowed @role  → give allowed access
+/config list               → view permissions
+/config remove @user       → remove access
+```
 
 ---
 
 ### commands
 
-[](#commands)
-
 | command | description |
 |:---|:---|
-| `/quickstart` | **owner only.** interactive wizard to set up everything. |
-| `/setup` | configure gist tokens and ids. |
-| `/product` | `add`, `list`, `view`, `delete` products. supports interactive menus. |
-| `/drop` | `add`, `list`, `view`, `delete` drops. supports interactive menus. |
-| `/announce` | post a nice embed of a product/drop to a channel. |
-| `/sync` | force a pull/push sync with github. |
-| `/ask` | ask the ai assistant for help. |
-| `/guide` | read the administrator guide. |
+| `/products` | manage products via interactive buttons |
+| `/upcoming` | manage upcoming releases via interactive buttons |
+| `/setup` | configure gist token, id, and base url (owner only) |
+| `/config` | manage user/role permissions |
+| `/help` | show available commands |
+| `/ask` | ai-powered help (requires nvidia api key) |
 
 ---
 
 ### project structure
 
-[](#project-structure)
-
 ```
 cinco/
 ├── src/
-│   ├── commands/    # slash command logic
-│   ├── services/    # gist & crypto handlers
+│   ├── commands/    # slash command handlers
+│   ├── handlers/    # button, modal, select menu handlers
+│   ├── services/    # gist, crypto, catbox upload
 │   ├── schema/      # json auto-detection
-│   └── ui/          # modals & embeds
+│   ├── database/    # sqlite + models
+│   └── ui/          # embeds & menus
 ├── data/            # sqlite database
 └── dist/            # compiled js
 ```
@@ -144,21 +141,23 @@ cinco/
 
 ### troubleshooting
 
-[](#troubleshooting)
+**bot not responding to buttons**
+make sure you rebuilt after update: `docker compose up -d --build`
 
-**json schema mismatch**
-if your website uses a different json structure, the bot tries to adapt. ensure your gist has root keys for `products` or `drops`.
+**commands not showing**
+run `npm run register` to register slash commands with discord.
+
+**image upload failed**
+catbox.moe may be temporarily down. try again or skip image.
 
 **encryption errors**
-if you change the `ENCRYPTION_KEY` in .env, all stored tokens will become unreadable. do not lose this key.
+if you change `ENCRYPTION_KEY` in .env, all stored tokens become unreadable.
 
 **rate limits**
-github api has a 5000 req/hour limit. cinco caches reads but writes are direct.
+github api: 5000 req/hour. cinco caches reads but writes are direct.
 
 ---
 
 ### license
-
-[](#license)
 
 mit
