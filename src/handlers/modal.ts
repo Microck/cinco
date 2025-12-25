@@ -56,15 +56,9 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   if (customId === 'product_add') {
     const rawImageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
     const imageUrl = fixImgurLink(rawImageUrl)
-    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     
     if (rawImageUrl && !isValidUrl(rawImageUrl)) {
       await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
-      return
-    }
-    
-    if (productUrl && !isValidUrl(productUrl)) {
-      await interaction.reply({ content: 'Invalid Product URL. Must start with http:// or https://', ephemeral: true })
       return
     }
 
@@ -74,12 +68,13 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     const id = extractSlug(rawId)
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
+    const brand = interaction.fields.getTextInputValue('brand') || ''
     
     const data = await fetchGistData(guildId)
     if (!data.products) data.products = []
     
     const products = data.products as Record<string, unknown>[]
-    const newItem = { id, name, price, imageUrl, productUrl, stock: 'STABLE' }
+    const newItem = { id, name, price, brand, imageUrl, stock: 'STABLE' }
     const mergedItem = mergeWithSchema(newItem, products)
     
     products.push(mergedItem)
@@ -119,15 +114,9 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
   if (customId.startsWith('product_edit:')) {
     const rawImageUrl = interaction.fields.getTextInputValue('imageUrl') || ''
     const imageUrl = fixImgurLink(rawImageUrl)
-    const productUrl = interaction.fields.getTextInputValue('productUrl') || ''
     
     if (rawImageUrl && !isValidUrl(rawImageUrl)) {
       await interaction.reply({ content: 'Invalid Image URL. Must start with http:// or https://', ephemeral: true })
-      return
-    }
-    
-    if (productUrl && !isValidUrl(productUrl)) {
-      await interaction.reply({ content: 'Invalid Product URL. Must start with http:// or https://', ephemeral: true })
       return
     }
 
@@ -136,6 +125,7 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
+    const brand = interaction.fields.getTextInputValue('brand') || ''
     const stock = interaction.fields.getTextInputValue('stock') || 'STABLE'
     
     const data = await fetchGistData(guildId)
@@ -147,7 +137,7 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
       return
     }
     
-    const updatedItem = { ...products[index], name, price, imageUrl, productUrl, stock }
+    const updatedItem = { ...products[index], name, price, brand, imageUrl, stock }
     const mergedItem = mergeWithSchema(updatedItem, products)
     products[index] = mergedItem
     

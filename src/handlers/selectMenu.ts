@@ -3,6 +3,7 @@ import { fetchGistData, updateGistData, type GistData } from '../services/gist.j
 import { buildProductEmbed, buildDropEmbed, buildProductEditModal } from '../ui/embeds.js'
 import { detectDropsKey } from '../schema/detector.js'
 import { hasPermission, isOwner } from '../utils/permissions.js'
+import { getServerConfig } from '../database/models.js'
 
 export async function handleSelectMenu(interaction: StringSelectMenuInteraction): Promise<void> {
   const { customId, values, guildId, user, member } = interaction
@@ -17,6 +18,8 @@ export async function handleSelectMenu(interaction: StringSelectMenuInteraction)
   const id = values[0]
   if (!id) return
   
+  const config = getServerConfig(guildId)
+  
   if (customId.startsWith('product_select_')) {
     const action = customId.replace('product_select_', '') as 'view' | 'edit' | 'delete'
     const data = await fetchGistData(guildId)
@@ -30,7 +33,7 @@ export async function handleSelectMenu(interaction: StringSelectMenuInteraction)
     
     if (action === 'view') {
       await interaction.deferReply({ ephemeral: true })
-      const embed = buildProductEmbed(product)
+      const embed = buildProductEmbed(product, config?.base_url)
       await interaction.editReply({ embeds: [embed] })
       return
     }

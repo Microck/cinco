@@ -5,6 +5,7 @@ export interface ServerConfig {
   gist_token_encrypted: string | null
   gist_id: string | null
   schema_profile: string | null
+  base_url: string | null
   created_at: number
   updated_at: number
 }
@@ -34,18 +35,20 @@ export function upsertServerConfig(
   guildId: string,
   tokenEncrypted: string | null,
   gistId: string | null,
-  schemaProfile: string | null
+  schemaProfile: string | null,
+  baseUrl?: string | null
 ): void {
   const db = getDb()
   db.prepare(`
-    INSERT INTO servers (guild_id, gist_token_encrypted, gist_id, schema_profile)
-    VALUES (?, ?, ?, ?)
+    INSERT INTO servers (guild_id, gist_token_encrypted, gist_id, schema_profile, base_url)
+    VALUES (?, ?, ?, ?, ?)
     ON CONFLICT(guild_id) DO UPDATE SET
       gist_token_encrypted = COALESCE(excluded.gist_token_encrypted, gist_token_encrypted),
       gist_id = COALESCE(excluded.gist_id, gist_id),
       schema_profile = COALESCE(excluded.schema_profile, schema_profile),
+      base_url = COALESCE(excluded.base_url, base_url),
       updated_at = unixepoch()
-  `).run(guildId, tokenEncrypted, gistId, schemaProfile)
+  `).run(guildId, tokenEncrypted, gistId, schemaProfile, baseUrl ?? null)
 }
 
 export function getPermissions(guildId: string): Permission[] {

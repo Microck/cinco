@@ -20,6 +20,10 @@ const commands = [
         .addStringOption(opt => opt.setName('id').setDescription('Gist ID').setRequired(true))
     )
     .addSubcommand(sub =>
+      sub.setName('baseurl').setDescription('Set website base URL (e.g., https://bdss.club)')
+        .addStringOption(opt => opt.setName('url').setDescription('Base URL').setRequired(true))
+    )
+    .addSubcommand(sub =>
       sub.setName('view').setDescription('View current config')
     ),
 
