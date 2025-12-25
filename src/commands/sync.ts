@@ -30,7 +30,13 @@ export async function handleSync(interaction: Interaction): Promise<void> {
   const data = await fetchGistData(cmd.guildId, true)
   const products = (data.products || []) as Record<string, unknown>[]
   
-  const repairedProducts = products.map(p => mergeWithSchema(p, products))
+  const repairedProducts = products.map(p => {
+    const merged = mergeWithSchema(p, products)
+    if (merged.productUrl === '' || merged.productUrl === null) {
+      delete merged.productUrl
+    }
+    return merged
+  })
   data.products = repairedProducts
 
   const dropsKey = Object.keys(data).find(k => 
