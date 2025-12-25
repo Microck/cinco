@@ -15,6 +15,23 @@ function isValidUrl(url: string): boolean {
   }
 }
 
+function extractSlug(input: string): string {
+  if (!input) return ''
+  // If it's a URL, get the last segment
+  if (input.startsWith('http')) {
+    try {
+      const url = new URL(input)
+      const pathname = url.pathname.replace(/\/$/, '') // remove trailing slash
+      const segments = pathname.split('/')
+      const last = segments.pop()
+      return last || input
+    } catch {
+      return input
+    }
+  }
+  return input
+}
+
 export async function handleModal(interaction: ModalSubmitInteraction): Promise<void> {
   const { customId, guildId } = interaction
   
@@ -53,7 +70,8 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
 
     await interaction.deferReply({ ephemeral: true })
     
-    const id = interaction.fields.getTextInputValue('id')
+    const rawId = interaction.fields.getTextInputValue('id')
+    const id = extractSlug(rawId)
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
     
@@ -67,14 +85,15 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     products.push(mergedItem)
     await updateGistData(guildId, data)
     
-    await interaction.editReply(`Added product: ${name}`)
+    await interaction.editReply(`Added product: ${name} (ID: ${id})`)
     return
   }
   
   if (customId === 'drop_add') {
     await interaction.deferReply({ ephemeral: true })
     
-    const id = interaction.fields.getTextInputValue('id')
+    const rawId = interaction.fields.getTextInputValue('id')
+    const id = extractSlug(rawId)
     const name = interaction.fields.getTextInputValue('name')
     const brand = interaction.fields.getTextInputValue('brand') || ''
     const hint = interaction.fields.getTextInputValue('hint') || ''
@@ -93,7 +112,7 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     drops.push(mergedItem)
     await updateGistData(guildId, data)
     
-    await interaction.editReply(`Added drop: ${name}`)
+    await interaction.editReply(`Added drop: ${name} (ID: ${id})`)
     return
   }
   
