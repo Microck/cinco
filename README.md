@@ -109,9 +109,6 @@ flowchart TD
   />
 </p>
 
-
-**browsing products:**
-
 #### 3. permissions
 
 ```
