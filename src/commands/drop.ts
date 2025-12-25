@@ -4,6 +4,7 @@ import { getServerConfig } from '../database/models.js'
 import { fetchGistData, updateGistData, type GistData } from '../services/gist.js'
 import { buildDropEmbed, buildDropModal } from '../ui/embeds.js'
 import { detectDropsKey } from '../schema/detector.js'
+import { buildDropSelectMenu } from '../ui/menus.js'
 
 export async function handleDrop(interaction: Interaction): Promise<void> {
   if (!interaction.isChatInputCommand()) return
@@ -58,7 +59,23 @@ export async function handleDrop(interaction: Interaction): Promise<void> {
   }
   
   if (sub === 'view') {
-    const id = cmd.options.getString('id', true)
+    const id = cmd.options.getString('id')
+    
+    if (!id) {
+      const data = await fetchGistData(cmd.guildId)
+      const dropsKey = detectDropsKey(data)
+      const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+      
+      if (drops.length === 0) {
+        await cmd.reply({ content: 'No drops found to view', ephemeral: true })
+        return
+      }
+      
+      const menu = buildDropSelectMenu(drops, 'view')
+      await cmd.reply({ content: 'Select a drop to view:', components: [menu], ephemeral: true })
+      return
+    }
+
     await cmd.deferReply({ ephemeral: true })
     
     const data = await fetchGistData(cmd.guildId)
@@ -77,7 +94,23 @@ export async function handleDrop(interaction: Interaction): Promise<void> {
   }
   
   if (sub === 'delete') {
-    const id = cmd.options.getString('id', true)
+    const id = cmd.options.getString('id')
+    
+    if (!id) {
+      const data = await fetchGistData(cmd.guildId)
+      const dropsKey = detectDropsKey(data)
+      const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+      
+      if (drops.length === 0) {
+        await cmd.reply({ content: 'No drops found to delete', ephemeral: true })
+        return
+      }
+      
+      const menu = buildDropSelectMenu(drops, 'delete')
+      await cmd.reply({ content: 'Select a drop to delete:', components: [menu], ephemeral: true })
+      return
+    }
+
     await cmd.deferReply({ ephemeral: true })
     
     const data = await fetchGistData(cmd.guildId)

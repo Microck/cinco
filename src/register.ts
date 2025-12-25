@@ -51,15 +51,15 @@ const commands = [
     .addSubcommand(sub => sub.setName('add').setDescription('Add a product'))
     .addSubcommand(sub =>
       sub.setName('view').setDescription('View product')
-        .addStringOption(opt => opt.setName('id').setDescription('Product ID').setRequired(true).setAutocomplete(true))
+        .addStringOption(opt => opt.setName('id').setDescription('Product ID (optional - omit for menu)').setRequired(false).setAutocomplete(true))
     )
     .addSubcommand(sub =>
       sub.setName('edit').setDescription('Edit a product')
-        .addStringOption(opt => opt.setName('id').setDescription('Product ID').setRequired(true).setAutocomplete(true))
+        .addStringOption(opt => opt.setName('id').setDescription('Product ID (optional - omit for menu)').setRequired(false).setAutocomplete(true))
     )
     .addSubcommand(sub =>
       sub.setName('delete').setDescription('Delete product')
-        .addStringOption(opt => opt.setName('id').setDescription('Product ID').setRequired(true).setAutocomplete(true))
+        .addStringOption(opt => opt.setName('id').setDescription('Product ID (optional - omit for menu)').setRequired(false).setAutocomplete(true))
     ),
 
   new SlashCommandBuilder()
@@ -69,11 +69,11 @@ const commands = [
     .addSubcommand(sub => sub.setName('add').setDescription('Add a drop'))
     .addSubcommand(sub =>
       sub.setName('view').setDescription('View drop')
-        .addStringOption(opt => opt.setName('id').setDescription('Drop ID').setRequired(true).setAutocomplete(true))
+        .addStringOption(opt => opt.setName('id').setDescription('Drop ID (optional - omit for menu)').setRequired(false).setAutocomplete(true))
     )
     .addSubcommand(sub =>
       sub.setName('delete').setDescription('Delete drop')
-        .addStringOption(opt => opt.setName('id').setDescription('Drop ID').setRequired(true).setAutocomplete(true))
+        .addStringOption(opt => opt.setName('id').setDescription('Drop ID (optional - omit for menu)').setRequired(false).setAutocomplete(true))
     ),
 
   new SlashCommandBuilder()

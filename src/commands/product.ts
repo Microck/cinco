@@ -3,6 +3,7 @@ import { hasPermission, isOwner } from '../utils/permissions.js'
 import { getServerConfig } from '../database/models.js'
 import { fetchGistData, updateGistData } from '../services/gist.js'
 import { buildProductEmbed, buildProductModal, buildProductEditModal } from '../ui/embeds.js'
+import { buildProductSelectMenu } from '../ui/menus.js'
 
 export async function handleProduct(interaction: Interaction): Promise<void> {
   if (!interaction.isChatInputCommand()) return
@@ -56,7 +57,22 @@ export async function handleProduct(interaction: Interaction): Promise<void> {
   }
   
   if (sub === 'view') {
-    const id = cmd.options.getString('id', true)
+    const id = cmd.options.getString('id')
+    
+    if (!id) {
+      const data = await fetchGistData(cmd.guildId)
+      const products = data.products || []
+      
+      if (products.length === 0) {
+        await cmd.reply({ content: 'No products found to view', ephemeral: true })
+        return
+      }
+      
+      const menu = buildProductSelectMenu(products, 'view')
+      await cmd.reply({ content: 'Select a product to view:', components: [menu], ephemeral: true })
+      return
+    }
+    
     await cmd.deferReply({ ephemeral: true })
     
     const data = await fetchGistData(cmd.guildId)
@@ -73,10 +89,22 @@ export async function handleProduct(interaction: Interaction): Promise<void> {
   }
   
   if (sub === 'edit') {
-    const id = cmd.options.getString('id', true)
-    
+    const id = cmd.options.getString('id')
     const data = await fetchGistData(cmd.guildId)
-    const product = (data.products || []).find(p => p.id === id)
+    const products = data.products || []
+    
+    if (!id) {
+      if (products.length === 0) {
+        await cmd.reply({ content: 'No products found to edit', ephemeral: true })
+        return
+      }
+      
+      const menu = buildProductSelectMenu(products, 'edit')
+      await cmd.reply({ content: 'Select a product to edit:', components: [menu], ephemeral: true })
+      return
+    }
+    
+    const product = products.find(p => p.id === id)
     
     if (!product) {
       await cmd.reply({ content: `Product not found: ${id}`, ephemeral: true })
@@ -89,7 +117,22 @@ export async function handleProduct(interaction: Interaction): Promise<void> {
   }
   
   if (sub === 'delete') {
-    const id = cmd.options.getString('id', true)
+    const id = cmd.options.getString('id')
+    
+    if (!id) {
+      const data = await fetchGistData(cmd.guildId)
+      const products = data.products || []
+      
+      if (products.length === 0) {
+        await cmd.reply({ content: 'No products found to delete', ephemeral: true })
+        return
+      }
+      
+      const menu = buildProductSelectMenu(products, 'delete')
+      await cmd.reply({ content: 'Select a product to delete:', components: [menu], ephemeral: true })
+      return
+    }
+
     await cmd.deferReply({ ephemeral: true })
     
     const data = await fetchGistData(cmd.guildId)
