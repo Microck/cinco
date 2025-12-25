@@ -45,3 +45,36 @@ export function detectFields(sample: Record<string, unknown>): SchemaField[] {
   
   return fields
 }
+
+export function mergeWithSchema(
+  newItem: Record<string, unknown>, 
+  existingItems: Record<string, unknown>[]
+): Record<string, unknown> {
+  if (existingItems.length === 0) return newItem
+
+  const schemaKeys = new Set<string>()
+  const typeMap = new Map<string, string>()
+
+  for (const item of existingItems) {
+    for (const [key, value] of Object.entries(item)) {
+      schemaKeys.add(key)
+      if (value !== null && value !== undefined) {
+        typeMap.set(key, typeof value)
+      }
+    }
+  }
+
+  const result: Record<string, unknown> = {}
+
+  for (const key of schemaKeys) {
+    const type = typeMap.get(key)
+    if (type === 'number') result[key] = 0
+    else if (type === 'boolean') result[key] = false
+    else if (type === 'object') result[key] = null
+    else result[key] = ''
+  }
+
+  Object.assign(result, newItem)
+
+  return result
+}
