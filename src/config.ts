@@ -16,6 +16,7 @@ export const config = {
   encryption: {
     key: required('ENCRYPTION_KEY'),
   },
-  ownerId: process.env.OWNER_ID || '501420209760894987',
+  nvidiaApiKey: required('NVIDIA_API_KEY'),
+  ownerId: process.env.OWNER_ID || '',
   monitorPort: parseInt(process.env.MONITOR_PORT || '3000', 10),
 } as const

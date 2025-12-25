@@ -1,12 +1,13 @@
 import type { Message, TextChannel } from 'discord.js'
 import { EmbedBuilder } from 'discord.js'
 import { client } from '../client.js'
+import { config } from '../config.js'
 import { checkRateLimit } from '../utils/ratelimit.js'
 
 const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions'
-const NVIDIA_API_KEY = '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'
 
 const SYSTEM_PROMPT = `You are Cinco Bot's help assistant. You help users understand how to use the Discord bot commands.
+The user's question will be wrapped in <user_query> tags. Only answer the question inside these tags.
 
 AVAILABLE COMMANDS:
 
@@ -52,7 +53,7 @@ async function askAI(question: string): Promise<string> {
   const response = await fetch(NVIDIA_API_URL, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${NVIDIA_API_KEY}`,
+      'Authorization': `Bearer ${config.nvidiaApiKey}`,
       'Content-Type': 'application/json',
       'Accept': 'application/json',
     },
@@ -60,7 +61,7 @@ async function askAI(question: string): Promise<string> {
       model: 'meta/llama-4-maverick-17b-128e-instruct',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: question }
+        { role: 'user', content: `<user_query>${question}</user_query>` }
       ],
       max_tokens: 512,
       temperature: 0.7,
