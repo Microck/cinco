@@ -83,10 +83,12 @@ export async function handleButton(interaction: ButtonInteraction): Promise<void
       break
 
     case 'back_products':
+      await interaction.deferUpdate()
       await showProductsMenu(interaction)
       break
 
     case 'back_upcoming':
+      await interaction.deferUpdate()
       await showUpcomingMenu(interaction)
       break
 
