@@ -13,24 +13,21 @@ export async function handleHelp(interaction: Interaction): Promise<void> {
   
   const embed = new EmbedBuilder()
     .setTitle('Cinco Bot')
-    .setColor(0x121417)
+    .setColor(0x2F3136)
   
   const commands = [
     '`/help` - Show this message',
+    '`/ask <question>` - AI-powered help',
   ]
   
   if (isAdmin) {
     commands.push(
-      '`/product list` - List all products',
-      '`/product add` - Add a product',
-      '`/product view <id>` - View product details',
-      '`/product delete <id>` - Delete a product',
-      '`/drop list` - List all drops',
-      '`/drop add` - Add a drop',
-      '`/drop view <id>` - View drop details',
-      '`/drop delete <id>` - Delete a drop',
-      '`/announce <type> <id>` - Post to channel',
-      '`/sync` - Force sync from Gist',
+      '',
+      '**Inventory**',
+      '`/products` - Manage products (add, edit, delete, announce)',
+      '`/upcoming` - Manage upcoming releases',
+      '',
+      '**Permissions**',
       '`/config add` - Add user/role permission',
       '`/config remove` - Remove permission',
       '`/config list` - List permissions',
@@ -39,9 +36,12 @@ export async function handleHelp(interaction: Interaction): Promise<void> {
   
   if (isOwner(cmd.user.id)) {
     commands.push(
+      '',
+      '**Setup (Owner)**',
       '`/setup token` - Set Gist token',
       '`/setup gist <id>` - Set Gist ID',
-      '`/setup view` - View server config',
+      '`/setup baseurl <url>` - Set website URL',
+      '`/setup view` - View config',
     )
   }
   

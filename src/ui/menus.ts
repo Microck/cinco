@@ -1,11 +1,11 @@
 import { StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } from 'discord.js'
 
-export function buildProductSelectMenu(products: any[], action: 'edit' | 'delete' | 'view'): ActionRowBuilder<StringSelectMenuBuilder> {
+export function buildProductSelectMenu(products: Record<string, unknown>[], action: string): ActionRowBuilder<StringSelectMenuBuilder> {
   const items = products.slice(0, 25)
   
   const select = new StringSelectMenuBuilder()
-    .setCustomId(`product_select_${action}`)
-    .setPlaceholder(`Select a product to ${action}...`)
+    .setCustomId(`product_select:${action}`)
+    .setPlaceholder('Select a product...')
     .addOptions(
       items.map((p) => {
         const id = String(p.id || 'unknown')
@@ -22,12 +22,12 @@ export function buildProductSelectMenu(products: any[], action: 'edit' | 'delete
   return new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select)
 }
 
-export function buildDropSelectMenu(drops: any[], action: 'edit' | 'delete' | 'view'): ActionRowBuilder<StringSelectMenuBuilder> {
+export function buildUpcomingSelectMenu(drops: Record<string, unknown>[], action: string): ActionRowBuilder<StringSelectMenuBuilder> {
   const items = drops.slice(0, 25)
   
   const select = new StringSelectMenuBuilder()
-    .setCustomId(`drop_select_${action}`)
-    .setPlaceholder(`Select a drop to ${action}...`)
+    .setCustomId(`upcoming_select:${action}`)
+    .setPlaceholder('Select an item...')
     .addOptions(
       items.map((d) => {
         const id = String(d.id || 'unknown')
