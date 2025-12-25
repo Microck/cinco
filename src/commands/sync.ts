@@ -35,6 +35,10 @@ export async function handleSync(interaction: Interaction): Promise<void> {
     if (merged.productUrl === '' || merged.productUrl === null) {
       delete merged.productUrl
     }
+    if (!merged.id && merged.productUrl) {
+      const match = String(merged.productUrl).match(/[?&]id=(\d+)/)
+      if (match) merged.id = match[1]
+    }
     return merged
   })
   data.products = repairedProducts
