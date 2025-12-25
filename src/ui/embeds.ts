@@ -5,7 +5,7 @@ export function buildProductEmbed(product: Record<string, unknown>): EmbedBuilde
     .setColor(0x121417)
   
   if (product.name) embed.setTitle(String(product.name))
-  if (product.imageUrl) embed.setThumbnail(String(product.imageUrl))
+  if (product.imageUrl) embed.setImage(fixImgurLink(String(product.imageUrl)))
   
   const fields: { name: string; value: string; inline: boolean }[] = []
   
@@ -40,7 +40,7 @@ export function buildDropEmbed(drop: Record<string, unknown>): EmbedBuilder {
     .setColor(0x121417)
   
   if (drop.name) embed.setTitle(String(drop.name))
-  if (drop.imageUrl) embed.setThumbnail(String(drop.imageUrl))
+  if (drop.imageUrl) embed.setImage(fixImgurLink(String(drop.imageUrl)))
   
   const fields: { name: string; value: string; inline: boolean }[] = []
   
@@ -53,6 +53,19 @@ export function buildDropEmbed(drop: Record<string, unknown>): EmbedBuilder {
   if (fields.length > 0) embed.addFields(fields)
   
   return embed
+}
+
+function fixImgurLink(url: string): string {
+  if (!url.includes('imgur.com')) return url
+  
+  if (url.includes('i.imgur.com') && /\.(jpg|jpeg|png|gif|webp)$/i.test(url)) return url
+  
+  const match = /imgur\.com\/(?:a\/|gallery\/)?([a-zA-Z0-9]{5,})/i.exec(url)
+  if (match && match[1]) {
+    return `https://i.imgur.com/${match[1]}.png`
+  }
+  
+  return url
 }
 
 export function buildProductModal(_guildId: string): ModalBuilder {
