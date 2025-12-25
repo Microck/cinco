@@ -18,7 +18,7 @@ git clone https://github.com/microck/cinco.git
 cd cinco
 cp .env.example .env
 
-# edit .env with your DISCORD_TOKEN
+# edit .env with your DISCORD_TOKEN, OWNER_ID, and NVIDIA_API_KEY
 # generate key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 # run
