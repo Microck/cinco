@@ -3,7 +3,7 @@ import { upsertServerConfig } from '../database/models.js'
 import { encrypt } from '../services/crypto.js'
 import { fetchGistData, updateGistData } from '../services/gist.js'
 import { isOwner } from '../utils/permissions.js'
-import { mergeWithSchema } from '../schema/detector.js'
+import { UPCOMING_KEY } from '../schema/detector.js'
 import { fixImgurLink } from '../utils/imgur.js'
 
 function isValidUrl(url: string): boolean {
@@ -74,10 +74,18 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     if (!data.products) data.products = []
     
     const products = data.products as Record<string, unknown>[]
-    const newItem = { id, name, price, brand, imageUrl, stock: 'STABLE' }
-    const mergedItem = mergeWithSchema(newItem, products)
+    const newProduct = {
+      id,
+      brand,
+      name,
+      category: 'Apparel',
+      price,
+      status: 'AVAILABLE',
+      productUrl: '',
+      imageUrl
+    }
     
-    products.push(mergedItem)
+    products.push(newProduct)
     await updateGistData(guildId, data)
     
     await interaction.editReply(`Added product: ${name} (ID: ${id})`)
@@ -94,17 +102,21 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     const hint = interaction.fields.getTextInputValue('hint') || ''
     
     const data = await fetchGistData(guildId)
-    const dropsKey = Object.keys(data).find(k => 
-      k !== 'products' && Array.isArray(data[k])
-    ) || 'drops'
+    if (!data[UPCOMING_KEY]) data[UPCOMING_KEY] = []
+    const drops = data[UPCOMING_KEY] as Record<string, unknown>[]
     
-    if (!data[dropsKey]) data[dropsKey] = []
-    const drops = data[dropsKey] as Record<string, unknown>[]
+    const newDrop = {
+      id,
+      brand,
+      name,
+      category: 'Apparel',
+      price: 'TBA',
+      status: 'CONFIRMED',
+      productUrl: '',
+      imageUrl: ''
+    }
     
-    const newItem = { id, name, brand, hint, status: 'PENDING' }
-    const mergedItem = mergeWithSchema(newItem, drops)
-    
-    drops.push(mergedItem)
+    drops.push(newDrop)
     await updateGistData(guildId, data)
     
     await interaction.editReply(`Added drop: ${name} (ID: ${id})`)
@@ -126,20 +138,18 @@ export async function handleModal(interaction: ModalSubmitInteraction): Promise<
     const name = interaction.fields.getTextInputValue('name')
     const price = parseFloat(interaction.fields.getTextInputValue('price')) || 0
     const brand = interaction.fields.getTextInputValue('brand') || ''
-    const stock = interaction.fields.getTextInputValue('stock') || 'STABLE'
+    const stock = interaction.fields.getTextInputValue('stock') || 'AVAILABLE'
     
     const data = await fetchGistData(guildId)
     const products = data.products as Record<string, unknown>[] || []
-    const index = products.findIndex((p: any) => p.id === productId)
+    const index = products.findIndex((p: Record<string, unknown>) => p.id === productId)
     
     if (index === -1) {
       await interaction.editReply(`Product not found: ${productId}`)
       return
     }
     
-    const updatedItem = { ...products[index], name, price, brand, imageUrl, stock }
-    const mergedItem = mergeWithSchema(updatedItem, products)
-    products[index] = mergedItem
+    products[index] = { ...products[index], name, price, brand, imageUrl, status: stock }
     
     data.products = products
     await updateGistData(guildId, data)

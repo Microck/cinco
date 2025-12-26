@@ -6,7 +6,7 @@ import { fetchGistData, updateGistData } from '../services/gist.js'
 import { uploadToCatbox } from '../services/catbox.js'
 import { buildProductEmbed, buildDropEmbed, buildProductModal, buildProductEditModal, buildDropModal } from '../ui/embeds.js'
 import { buildProductSelectMenu, buildUpcomingSelectMenu } from '../ui/menus.js'
-import { detectDropsKey } from '../schema/detector.js'
+import { UPCOMING_KEY } from '../schema/detector.js'
 
 export async function handleButton(interaction: ButtonInteraction): Promise<void> {
   const [action, ...args] = interaction.customId.split(':')
@@ -124,8 +124,7 @@ async function handleSync(interaction: ButtonInteraction): Promise<void> {
   await interaction.deferUpdate()
   const data = await fetchGistData(interaction.guildId!, true)
   const products = (data.products || []) as unknown[]
-  const dropsKey = detectDropsKey(data)
-  const drops = (data[dropsKey] || []) as unknown[]
+  const drops = (data[UPCOMING_KEY] || []) as unknown[]
   
   await interaction.followUp({ content: `Synced: ${products.length} products, ${drops.length} upcoming`, ephemeral: true })
 }
@@ -183,8 +182,7 @@ async function handleProductAnnounce(interaction: ButtonInteraction, productId: 
 async function handleUpcomingList(interaction: ButtonInteraction): Promise<void> {
   await interaction.deferUpdate()
   const data = await fetchGistData(interaction.guildId!)
-  const dropsKey = detectDropsKey(data)
-  const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+  const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
   
   if (drops.length === 0) {
     await interaction.editReply({ content: 'No upcoming items yet', components: [] })
@@ -206,8 +204,7 @@ async function handleUpcomingList(interaction: ButtonInteraction): Promise<void>
 
 async function handleUpcomingEdit(interaction: ButtonInteraction, dropId: string): Promise<void> {
   const data = await fetchGistData(interaction.guildId!)
-  const dropsKey = detectDropsKey(data)
-  const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+  const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
   const drop = drops.find(d => d.id === dropId)
   
   if (!drop) {
@@ -221,8 +218,7 @@ async function handleUpcomingEdit(interaction: ButtonInteraction, dropId: string
 async function handleUpcomingDelete(interaction: ButtonInteraction, dropId: string): Promise<void> {
   await interaction.deferUpdate()
   const data = await fetchGistData(interaction.guildId!)
-  const dropsKey = detectDropsKey(data)
-  const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+  const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
   const idx = drops.findIndex(d => d.id === dropId)
   
   if (idx === -1) {
@@ -231,7 +227,7 @@ async function handleUpcomingDelete(interaction: ButtonInteraction, dropId: stri
   }
 
   const deleted = drops.splice(idx, 1)[0]
-  data[dropsKey] = drops
+  data[UPCOMING_KEY] = drops
   await updateGistData(interaction.guildId!, data)
   
   await interaction.followUp({ content: `Deleted: ${deleted.name}`, ephemeral: true })
@@ -240,8 +236,7 @@ async function handleUpcomingDelete(interaction: ButtonInteraction, dropId: stri
 
 async function handleUpcomingAnnounce(interaction: ButtonInteraction, dropId: string): Promise<void> {
   const data = await fetchGistData(interaction.guildId!)
-  const dropsKey = detectDropsKey(data)
-  const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+  const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
   const drop = drops.find(d => d.id === dropId)
   
   if (!drop) {
@@ -310,8 +305,7 @@ async function saveWithImage(guildId: string, type: 'product' | 'upcoming', temp
       await updateGistData(guildId, data)
     }
   } else {
-    const dropsKey = detectDropsKey(data)
-    const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+  const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
     const drop = drops.find(d => d.id === tempId)
     if (drop) {
       drop.imageUrl = imageUrl

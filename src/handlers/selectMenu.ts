@@ -2,7 +2,7 @@ import type { StringSelectMenuInteraction } from 'discord.js'
 import { fetchGistData } from '../services/gist.js'
 import { buildProductEmbed, buildDropEmbed, buildProductEditModal } from '../ui/embeds.js'
 import { buildProductActionButtons, buildUpcomingActionButtons } from './button.js'
-import { detectDropsKey } from '../schema/detector.js'
+import { UPCOMING_KEY } from '../schema/detector.js'
 import { hasPermission, isOwner } from '../utils/permissions.js'
 import { getServerConfig } from '../database/models.js'
 
@@ -48,8 +48,7 @@ export async function handleSelectMenu(interaction: StringSelectMenuInteraction)
   
   if (type === 'upcoming_select') {
     const data = await fetchGistData(guildId)
-    const dropsKey = detectDropsKey(data)
-    const drops = (data[dropsKey] || []) as Record<string, unknown>[]
+    const drops = (data[UPCOMING_KEY] || []) as Record<string, unknown>[]
     const drop = drops.find(d => String(d.id) === id)
     
     if (!drop) {
