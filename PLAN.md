@@ -69,7 +69,7 @@ src/
 │   ├── db.ts          # sqlite
 │   └── models.ts      # server configs, permissions
 ├── schema/
-│   └── detector.ts    # auto-detect json structure
+│   └── detector.ts    # schema constants (products/upcoming keys)
 └── ui/
     ├── embeds.ts      # embed builders
     └── menus.ts       # select menu builders
@@ -93,7 +93,7 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 
 - Interactive button-based UI
 - Image upload via Catbox.moe (no api key needed)
-- Auto-detect gist schema
+- Fixed schema: products[] and upcoming[]
 - Encrypted token storage
 - Per-server permissions
 - AI help via /ask

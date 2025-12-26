@@ -4,7 +4,7 @@
   </a>
 </p>
 
-<p align="center">a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync, schema auto-detection, and encrypted token storage.</p>
+<p align="center">a multi-server discord bot that manages shop websites using github gist as a backend. supports real-time sync and encrypted token storage.</p>
 
 <p align="center">
   <a href="LICENSE"><img alt="license" src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
@@ -146,7 +146,8 @@ cinco/
 │   ├── commands/    # slash command handlers
 │   ├── handlers/    # button, modal, select menu handlers
 │   ├── services/    # gist, crypto, catbox upload
-│   ├── schema/      # json auto-detection
+│   ├── schema/      # schema constants
+
 │   ├── database/    # sqlite + models
 │   └── ui/          # embeds & menus
 ├── data/            # sqlite database
