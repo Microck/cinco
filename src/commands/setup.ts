@@ -51,6 +51,17 @@ export async function handleSetup(interaction: Interaction): Promise<void> {
     return
   }
   
+  if (sub === 'channel') {
+    const channel = cmd.options.getChannel('channel')
+    const channelId = channel ? channel.id : null
+    upsertServerConfig(cmd.guildId, null, null, null, null, channelId)
+    await cmd.reply({ 
+      content: channelId ? `Bot restricted to <#${channelId}>` : 'Bot restriction removed (can be used in any channel)', 
+      ephemeral: true 
+    })
+    return
+  }
+  
   if (sub === 'view') {
     const config = getServerConfig(cmd.guildId)
     if (!config || !config.gist_id) {
@@ -65,6 +76,7 @@ export async function handleSetup(interaction: Interaction): Promise<void> {
         `Gist ID: \`${config.gist_id}\``,
         `Token: ${hasToken ? 'Set' : 'Not set'}`,
         `Base URL: ${config.base_url || 'Not set'}`,
+        `Allowed Channel: ${config.allowed_channel_id ? `<#${config.allowed_channel_id}>` : 'Any'}`,
         `Schema: ${config.schema_profile || 'Auto-detect'}`,
       ].join('\n'),
       ephemeral: true,

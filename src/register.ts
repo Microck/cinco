@@ -28,6 +28,10 @@ const commands = [
         .addStringOption(opt => opt.setName('url').setDescription('Base URL').setRequired(true))
     )
     .addSubcommand(sub =>
+      sub.setName('channel').setDescription('Restrict bot to a specific channel')
+        .addChannelOption(opt => opt.setName('channel').setDescription('Channel to allow (leave empty to reset)'))
+    )
+    .addSubcommand(sub =>
       sub.setName('view').setDescription('View current config')
     ),
 
