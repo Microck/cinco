@@ -31,6 +31,7 @@ export function initDb(): void {
       gist_id TEXT,
       schema_profile TEXT,
       base_url TEXT,
+      allowed_channel_id TEXT,
       created_at INTEGER DEFAULT (unixepoch()),
       updated_at INTEGER DEFAULT (unixepoch())
     );
@@ -54,4 +55,10 @@ export function initDb(): void {
 
     CREATE INDEX IF NOT EXISTS idx_permissions_guild ON permissions(guild_id);
   `)
+
+  const columns = db.prepare("PRAGMA table_info(servers)").all() as any[]
+  const hasChannelCol = columns.some(c => c.name === 'allowed_channel_id')
+  if (!hasChannelCol) {
+    db.exec('ALTER TABLE servers ADD COLUMN allowed_channel_id TEXT;')
+  }
 }

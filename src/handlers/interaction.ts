@@ -1,4 +1,6 @@
 import type { Interaction } from 'discord.js'
+import { getServerConfig } from '../database/models.js'
+import { isOwner } from '../utils/permissions.js'
 import { handleSetup } from '../commands/setup.js'
 import { handleConfig } from '../commands/config.js'
 import { handleProducts } from '../commands/products.js'
@@ -64,6 +66,19 @@ export async function handleInteraction(interaction: Interaction): Promise<void>
   }
   
   if (!interaction.isChatInputCommand()) return
+  
+  if (interaction.guildId) {
+    const config = getServerConfig(interaction.guildId)
+    if (config?.allowed_channel_id && interaction.channelId !== config.allowed_channel_id) {
+      if (!isOwner(interaction.user.id)) {
+        await interaction.reply({ 
+          content: `This bot can only be used in <#${config.allowed_channel_id}>`, 
+          ephemeral: true 
+        })
+        return
+      }
+    }
+  }
   
   const handler = commands[interaction.commandName]
   if (!handler) {
